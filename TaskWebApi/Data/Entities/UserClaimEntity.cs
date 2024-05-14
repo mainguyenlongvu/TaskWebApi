@@ -1,7 +1,14 @@
-﻿namespace TaskWebApi.Repositories.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TaskWebApi.Repositories.Entities
 {
+    [Table("UserClaim")]
+
     public class UserClaimEntity
     {
+        [Key]
+
         public int Id { get; set; }
         public int UserId { get; set; }
         public UserEntity User { get; set; }

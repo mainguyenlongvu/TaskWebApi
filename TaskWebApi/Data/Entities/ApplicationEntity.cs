@@ -1,9 +1,14 @@
-﻿using TaskWebApi.Enum;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using TaskWebApi.Enum;
 
 namespace TaskWebApi.Repositories.Entities
 {
+    [Table("Application")]
+
     public class ApplicationEntity
     {
+        [Key]
         public int Id { get; set; }
         public ApplicationType ApplicationType { get; set; }
         public string Name { get; set; }

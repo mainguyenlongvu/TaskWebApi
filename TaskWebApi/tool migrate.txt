@@ -1,2 +1,2 @@
-﻿dotnet ef migrations add update2 -v --context TaskDbContext
+﻿dotnet ef migrations add initial -v --context TaskDbContext
 dotnet ef database update -v --context TaskDbContext

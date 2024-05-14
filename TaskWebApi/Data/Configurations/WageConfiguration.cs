@@ -17,7 +17,6 @@ namespace TaskWebApi.Repositories.Configurations
 
             // Primary Key
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).UseIdentityColumn();
 
             // Other properties
 

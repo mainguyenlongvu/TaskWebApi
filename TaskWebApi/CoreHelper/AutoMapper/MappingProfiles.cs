@@ -15,8 +15,7 @@ namespace TaskWebApi.CoreHelper
               .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth))
               .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
               .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.Password))
-              .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles))
-              .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+              .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles));
 
 
         }

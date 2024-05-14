@@ -1,29 +1,21 @@
 ﻿using TaskWebApi.Repositories.Entities;
 using Microsoft.EntityFrameworkCore;
 using TaskWebApi.Repositories.Configurations;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace TaskWebApi.Repositories.EF
 {
-    public class TaskDbContext : DbContext
+    public class TaskDbContext : IdentityDbContext<UserEntity>
     {
-        public TaskDbContext(DbContextOptions options) : base(options)
+        public TaskDbContext(DbContextOptions<TaskDbContext> opt) : base(opt)
         {
 
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            //Configure using Fluent API
-            modelBuilder.ApplyConfiguration(new ApplicationConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
-            modelBuilder.ApplyConfiguration(new WageConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-            modelBuilder.ApplyConfiguration(new UserClaimConfiguration());
 
-            // Generate data
-        }
+     
 
-        public DbSet<UserEntity> Users { get; set; }
         public DbSet<ApplicationEntity> Applications { get; set; }
         public DbSet<ClaimEntity> Claims { get; set; }
         public DbSet<WageEntity> Wages { get; set; }

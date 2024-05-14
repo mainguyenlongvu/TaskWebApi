@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using AutoMapper;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -17,19 +18,21 @@ namespace API.Controllers
         private readonly IUserService _userService;
         private readonly IConfiguration _config;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IMapper _mapper;
 
-        public UserController(IUserService userService, IConfiguration config, IAuthenticationService authenticationService)
+        public UserController(IUserService userService, IConfiguration config, IAuthenticationService authenticationService, IMapper mapper)
         {
 
             this._userService = userService;
             _config = config;
             _authenticationService = authenticationService;
+            _mapper = mapper;
 
         }
 
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        //[Authorize(AuthenticationSchemes = "Bearer")]
         [Route("/api/[controller]/get-all-user")]
         public async Task<ActionResult<UserEntity>> GetAllUsers()
         {
@@ -46,7 +49,7 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("/api/[controller]/get-user-by-id")]
-        public async Task<ActionResult<UserEntity>> GetUserById(int id)
+        public async Task<ActionResult<UserEntity>> GetUserById(string id)
         {
             try
             {
@@ -70,35 +73,29 @@ namespace API.Controllers
         public async Task<ActionResult> Login([FromBody] RequestLoginModel requestLoginModel)
         {
 
-            return Ok(_authenticationService.AuthenticatorAsync(requestLoginModel));
+            return Ok(await _userService.LoginAsync(requestLoginModel));
         }
 
-        private string GenerateJWTToken(string username)
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("/api/[controller]/register")]
+        public async Task<ActionResult<UserEntity>> Register([FromBody] RegisterModel registerModel)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            try
             {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "Admin"), // Thêm các quyền của người dùng vào đây
-                // Các thông tin khác của người dùng có thể được thêm vào đây
-            };
+                var newUser = await _userService.Register(registerModel);
 
-            var token = new JwtSecurityToken(
-                issuer: _config["JwtSettings:Issuer"],
-                audience: _config["JwtSettings:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(1), // Thời gian sống của token
-                signingCredentials: credentials);
+                return Ok(_mapper.Map<UserEntity>(newUser));
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-    
-
         [HttpPut]
         [Route("/api/[controller]/edit-user")]
-        public async Task<ActionResult<UserEntity>> EditUser([FromRoute] int id , [FromBody] UserModel userModel)
+        public async Task<ActionResult<UserEntity>> EditUser([FromRoute] string id , [FromBody] UserModel userModel)
         { 
             try
             {
@@ -119,7 +116,7 @@ namespace API.Controllers
 
         [HttpDelete]
         [Route("/api/[controller]/delete-user-by-id")]
-        public async Task<ActionResult> DeleteUser([FromRoute] int id)
+        public async Task<ActionResult> DeleteUser([FromRoute] string id)
         {
             try
             {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
+using TaskWebApi.Model;
 using TaskWebApi.Repositories.EF;
 using TaskWebApi.Repositories.Entities;
 
@@ -14,11 +16,16 @@ namespace TaskWebApi.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly TaskDbContext _context;
+        private IOptionsMonitor<AppSetting> _optionsMonitor;
         private IUserRepository _userRepository;
         private IRefreshTokensRepository _refreshTokensRepository;
-        public UnitOfWork(TaskDbContext context)
+        private readonly IConfiguration _configuration;
+
+        public UnitOfWork(TaskDbContext context,  IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration)
         {
             _context = context;
+            _optionsMonitor = optionsMonitor;
+            _configuration = configuration;
         }
 
         public IUserRepository UserRepository
@@ -27,7 +34,7 @@ namespace TaskWebApi.Repositories
             {
                 if (_userRepository == null)
                 {
-                    _userRepository = new UserRepository(_context);
+                    _userRepository = new UserRepository(_context, _optionsMonitor, _configuration);
                 }
                 return _userRepository;
             }

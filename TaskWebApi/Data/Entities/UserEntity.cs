@@ -3,11 +3,12 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TaskWebApi.Repositories.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace TaskWebApi.Repositories.Entities
 {
     [Table("User")]
-    public class UserEntity : Entity
+    public class UserEntity : IdentityUser
     {
         
 

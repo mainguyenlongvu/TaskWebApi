@@ -17,7 +17,6 @@ namespace TaskWebApi.Repositories.Configurations
 
             // Primary Key
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id).UseIdentityColumn();
 
             builder.HasIndex(x => x.UserId);
             builder.HasIndex(x => x.ClaimId);

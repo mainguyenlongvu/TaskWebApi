@@ -1,15 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TaskWebApi.Repositories.Entities;
 
 namespace TaskWebApi.Repositories.Entities
 {
+    [Table("RefreshToken")]
+
     public class RefreshTokens
     {
-        public int Id { get; set; }
+        [Key]
+
+        public string Id { get; set; }
 
         [ForeignKey("UserId")]
         public UserEntity User { get; set; }
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public string? Token { get; set; }
         public DateTime Expires { get; set; }
