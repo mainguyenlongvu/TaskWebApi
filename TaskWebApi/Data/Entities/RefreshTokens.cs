@@ -9,11 +9,11 @@ namespace TaskWebApi.Repositories.Entities
     public class RefreshTokens
     {
         [Key]
-
         public string Id { get; set; }
 
-        [ForeignKey("UserId")]
+        
         public UserEntity User { get; set; }
+        [ForeignKey(nameof(UserEntity))]
         public string UserId { get; set; }
 
         public string? Token { get; set; }

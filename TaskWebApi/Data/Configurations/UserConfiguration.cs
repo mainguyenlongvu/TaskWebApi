@@ -20,7 +20,6 @@ namespace TaskWebApi.Repositories.Configurations
 
             // Other properties
             builder.Property(x => x.DateOfBirth).IsRequired();
-            builder.Property(x => x.Password).IsRequired();
             builder.Property(x => x.Email).IsRequired();
         }
     }

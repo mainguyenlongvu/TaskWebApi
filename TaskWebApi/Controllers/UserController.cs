@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TaskWebApi.CoreHelper.Helper;
+using TaskWebApi.Enum;
 using TaskWebApi.Model;
 using TaskWebApi.Repositories.Entities;
 using TaskWebApi.Services;
@@ -34,6 +36,7 @@ namespace API.Controllers
         [HttpGet]
         //[Authorize(AuthenticationSchemes = "Bearer")]
         [Route("/api/[controller]/get-all-user")]
+        [Authorize(Roles = AppRole.Admin)]
         public async Task<ActionResult<UserEntity>> GetAllUsers()
         {
             try
@@ -72,27 +75,38 @@ namespace API.Controllers
         [Route("/api/[controller]/login")]
         public async Task<ActionResult> Login([FromBody] RequestLoginModel requestLoginModel)
         {
+            var result = await _userService.LoginAsync(requestLoginModel);
 
-            return Ok(await _userService.LoginAsync(requestLoginModel));
+            if (string.IsNullOrEmpty(result))
+            {
+                return BadRequest("Wrong!!!!");
+            }
+
+            return Ok(result);
         }
 
-        [AllowAnonymous]
+
         [HttpPost]
         [Route("/api/[controller]/register")]
-        public async Task<ActionResult<UserEntity>> Register([FromBody] RegisterModel registerModel)
+        public async Task<ActionResult> Register(RegisterModel registerModel)
         {
             try
             {
-                var newUser = await _userService.Register(registerModel);
+                var result = await _userService.Register(registerModel);
 
-                return Ok(_mapper.Map<UserEntity>(newUser));
+                if (result.Succeeded)
+                {
+                    return Ok(result);
+                }
 
+                return BadRequest(result.Errors.Select(e => e.Description));
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpPut]
         [Route("/api/[controller]/edit-user")]
         public async Task<ActionResult<UserEntity>> EditUser([FromRoute] string id , [FromBody] UserModel userModel)

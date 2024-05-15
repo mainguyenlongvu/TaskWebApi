@@ -23,7 +23,7 @@ namespace TaskWebApi.Repositories.Configurations
             builder.Property(x => x.UserId).IsRequired();
 
             // 1:M relationship with User
-            builder.HasOne(b => b.UserEntity)
+            builder.HasOne(b => b.User)
                    .WithMany(u => u.Wages)
                    .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.NoAction);

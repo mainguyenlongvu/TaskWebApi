@@ -15,6 +15,7 @@ namespace TaskWebApi.Repositories.Entities
         public string reason { get; set; }
         public string Description { get; set; }
         public string? Image_Url { get; set; }
+        [ForeignKey(nameof(UserEntity))]
         public int UserId { get; set; }
         public bool IsApproved { get; set; }
 

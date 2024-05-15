@@ -12,10 +12,10 @@ namespace TaskWebApi.Services
     {
         Task<List<UserEntity>> GetAllUsersAsync();
         Task<UserEntity> GetUserByIdAsync(string id);
-        Task<UserEntity> CreateUserAsync(UserModel userModel);
-        Task<UserEntity> Register(RegisterModel registerModel);
+        //Task<UserEntity> CreateUserAsync(UserModel userModel);
+        Task<IdentityResult> Register(RegisterModel registerModel);
         Task<UserEntity> UpdateUserAsync(string id, UserModel userModel);
-        Task<ResponseLoginModel> LoginAsync(RequestLoginModel requestLoginModel);
+        Task<string> LoginAsync(RequestLoginModel requestLoginModel);
         Task DeleteUserAsync(string id);
     }
     public class UserService : IUserService
@@ -37,25 +37,23 @@ namespace TaskWebApi.Services
             var users = await userRepository.GetAllAsync();
             return users;
         }
-        public async Task<ResponseLoginModel> LoginAsync(RequestLoginModel requestLoginModel)
+        public async Task<string> LoginAsync(RequestLoginModel requestLoginModel)
         {
             var userRepository = _unitOfWork.UserRepository;
             var login = await userRepository.CheckLoginAsync(requestLoginModel);
             return login;
         }
 
-        public async Task<UserEntity> Register(RegisterModel registerModel)
+        public async Task<IdentityResult> Register(RegisterModel registerModel)
         {
             var user = _unitOfWork.UserRepository;
             if (await user.GetByEmailAsync(registerModel.Email) != null)
-                throw new Exception($"Email: {registerModel.Email} is exit!");
+                throw new Exception($"Email: {registerModel.Email} already exists!");
 
-
-            var newUser = _mapper.Map<UserEntity>(registerModel);
-
-            var result = await user.CreateAsync(newUser);
-            return newUser;
+            var result = await user.CreateAsync(registerModel);
+            return result;
         }
+
 
 
         public async Task<UserEntity> GetUserByIdAsync(string id)
@@ -65,14 +63,14 @@ namespace TaskWebApi.Services
             return user;
         }
 
-        public async Task<UserEntity> CreateUserAsync(UserModel userDto)
-        {
-            var userRepository = _unitOfWork.UserRepository;
-            var user = _mapper.Map<UserEntity>(userDto);
-            await userRepository.CreateAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-            return user;
-        }
+        //public async Task<UserEntity> CreateUserAsync(RegisterModel registerModel)
+        //{
+        //    var userRepository = _unitOfWork.UserRepository;
+        //    var user = _mapper.Map<UserEntity>(userDto);
+        //    await userRepository.CreateAsync(UserModel);
+        //    await _unitOfWork.SaveChangesAsync();
+        //    return user;
+        //}
 
         public async Task<UserEntity> UpdateUserAsync(string  id, UserModel userDto)
         {

@@ -14,7 +14,8 @@ namespace TaskWebApi.Repositories.Entities
         public double Price { get; set; }
         public int DayOff { get; set; }
         public int Total { get; set; }
+        [ForeignKey(nameof(UserEntity))]
         public int UserId { get; set; }
-        public UserEntity UserEntity { get; set; }
+        public UserEntity User { get; set; }
     }
 }

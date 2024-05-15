@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using System;
 using TaskWebApi.Model;
 using TaskWebApi.Repositories.EF;
@@ -20,12 +21,18 @@ namespace TaskWebApi.Repositories
         private IUserRepository _userRepository;
         private IRefreshTokensRepository _refreshTokensRepository;
         private readonly IConfiguration _configuration;
+        private readonly SignInManager<UserEntity> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<UserEntity> _userManager;
 
-        public UnitOfWork(TaskDbContext context,  IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration)
+        public UnitOfWork(TaskDbContext context,  IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration, SignInManager<UserEntity> signInManager, RoleManager<IdentityRole> roleManager, UserManager<UserEntity> userManager)
         {
             _context = context;
             _optionsMonitor = optionsMonitor;
             _configuration = configuration;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
+            _userManager = userManager;
         }
 
         public IUserRepository UserRepository
@@ -34,7 +41,7 @@ namespace TaskWebApi.Repositories
             {
                 if (_userRepository == null)
                 {
-                    _userRepository = new UserRepository(_context, _optionsMonitor, _configuration);
+                    _userRepository = new UserRepository(_context, _optionsMonitor, _configuration, _roleManager, _userManager, _signInManager);
                 }
                 return _userRepository;
             }

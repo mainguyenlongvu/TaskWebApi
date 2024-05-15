@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskWebApi.Repositories.EF;
 
@@ -11,9 +12,11 @@ using TaskWebApi.Repositories.EF;
 namespace TaskWebApi.Migrations
 {
     [DbContext(typeof(TaskDbContext))]
-    partial class TaskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240515035301_update1")]
+    partial class update1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -384,16 +387,16 @@ namespace TaskWebApi.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId1")
+                    b.Property<string>("UserEntityId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserEntityId");
 
                     b.ToTable("Wage");
                 });
@@ -488,13 +491,13 @@ namespace TaskWebApi.Migrations
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.WageEntity", b =>
                 {
-                    b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "User")
+                    b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "UserEntity")
                         .WithMany("Wages")
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserEntityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("UserEntity");
                 });
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.ClaimEntity", b =>

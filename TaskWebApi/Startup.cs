@@ -28,9 +28,34 @@ namespace TaskWebApi
         {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen(o =>
+            services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
+            services.AddSwaggerGen(option =>
             {
-                o.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskWebApi", Version = "v1" });
+                option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+                option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
+                option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
             });
 
             services.Configure<RouteOptions>(options =>
@@ -39,17 +64,25 @@ namespace TaskWebApi
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = false;
             });
+
             services.AddDbContext<TaskDbContext>(options =>
             {
                 options.UseSqlServer(_configuration.GetConnectionString("TaskWebApiDB"));
             });
-            services.AddIdentity<UserEntity, IdentityRole>().AddEntityFrameworkStores<TaskDbContext>().AddDefaultTokenProviders();
 
-            services.AddAuthentication(options => {
+            services.AddIdentity<UserEntity, IdentityRole>()
+                .AddEntityFrameworkStores<TaskDbContext>()
+                .AddDefaultTokenProviders();
+
+            var key = Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]);
+
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options => {
+            }).AddJwtBearer(options =>
+            {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -58,48 +91,14 @@ namespace TaskWebApi
                     ValidateAudience = true,
                     ValidAudience = _configuration["JWT:ValidAudience"],
                     ValidIssuer = _configuration["JWT:ValidIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
-            AddDI(services);
-            //services.AddSingleton<ApiKeyAuthorizationFilter>();
-            //services.AddSingleton<IApiKeyValidator, ApiKeyValidator>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
 
+            AddDI(services);
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.Configure<AppSetting>(_configuration.GetSection("AppSettings"));
-
-            var secretKey = _configuration["AppSettings:SecretKey"];
-            var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
-
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(opt =>
-            //    {
-            //        opt.TokenValidationParameters = new TokenValidationParameters
-            //        {
-            //            //tự cấp token
-            //            ValidateIssuer = false,
-            //            ValidateAudience = false,
-
-            //            //ký vào token
-            //            ValidateIssuerSigningKey = true,
-            //            IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
-
-            //            ClockSkew = TimeSpan.Zero
-            //        };
-            //    });
-
-            //services.AddAuthentication("Bearer").AddJwtBearer(o =>
-            //{
-            //    o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-            //    {
-            //        ValidateIssuer = false,
-            //        ValidateAudience = false,
-            //        ValidateLifetime = false,
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KeyAuthentication"))
-            //    };
-            //});
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
@@ -108,8 +107,9 @@ namespace TaskWebApi
             {
                 app.UseDeveloperExceptionPage();
             }
-            var isUserSwagger = _configuration.GetValue<bool>("UseSwagger", false);
-            if (isUserSwagger)
+
+            var useSwagger = _configuration.GetValue<bool>("UseSwagger", false);
+            if (useSwagger)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -119,16 +119,15 @@ namespace TaskWebApi
                 });
             }
 
-            //app.UseMiddleware<ApiKeyAuthenExtension>();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
             app.MapControllers();
-            app.UseEndpoints(endpoint =>
+            app.UseEndpoints(endpoints =>
             {
-                endpoint.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
 
