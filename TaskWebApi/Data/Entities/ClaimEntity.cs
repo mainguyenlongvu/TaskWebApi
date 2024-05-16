@@ -9,7 +9,7 @@ namespace TaskWebApi.Repositories.Entities
     {
         [Key]
 
-        public int Id { get; set; }
+        public string Id { get; set; }
         public List<UserClaimEntity> UserClaims { get; set; }
 
     }

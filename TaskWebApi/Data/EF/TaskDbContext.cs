@@ -4,6 +4,7 @@ using TaskWebApi.Repositories.Configurations;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using TaskWebApi.Data.Entities;
 
 namespace TaskWebApi.Repositories.EF
 {
@@ -32,6 +33,7 @@ namespace TaskWebApi.Repositories.EF
 
 
         public DbSet<ApplicationEntity> Applications { get; set; }
+        public DbSet<AttachmentEntity> Attachments { get; set; }
         public DbSet<ClaimEntity> Claims { get; set; }
         public DbSet<WageEntity> Wages { get; set; }
         public DbSet<UserClaimEntity> UserClaims { get; set; }

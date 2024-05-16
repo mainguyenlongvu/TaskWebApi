@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
+using TaskWebApi.CoreHelper.Helper;
 using TaskWebApi.Model;
 using TaskWebApi.Repositories.EF;
 using TaskWebApi.Repositories.Entities;
@@ -11,6 +14,8 @@ namespace TaskWebApi.Repositories
     {
         IUserRepository UserRepository { get; }
         IRefreshTokensRepository RefreshTokensRepository { get; }
+        IApplicationRepository ApplicationRepository { get;  }
+        IAttachmentRepository AttachmentRepository { get; }
         Task<int> SaveChangesAsync();
     }
 
@@ -20,19 +25,27 @@ namespace TaskWebApi.Repositories
         private IOptionsMonitor<AppSetting> _optionsMonitor;
         private IUserRepository _userRepository;
         private IRefreshTokensRepository _refreshTokensRepository;
+        private IApplicationRepository _applicationRepository;
+        private IAttachmentRepository _attachmentRepository;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
+        //private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly SignInManager<UserEntity> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<UserEntity> _userManager;
-
-        public UnitOfWork(TaskDbContext context,  IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration, SignInManager<UserEntity> signInManager, RoleManager<IdentityRole> roleManager, UserManager<UserEntity> userManager)
-        {
+        private readonly SendMail _sendMail;
+        public UnitOfWork(TaskDbContext context,  IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration, SignInManager<UserEntity> signInManager, RoleManager<IdentityRole> roleManager, UserManager<UserEntity> userManager, SendMail sendMail, IApplicationRepository applicationRepository, IAttachmentRepository attachmentRepository, IMapper mapper, IWebHostEnvironment webHostEnvironment)  {
             _context = context;
             _optionsMonitor = optionsMonitor;
             _configuration = configuration;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _userManager = userManager;
+            _sendMail = sendMail;
+            _applicationRepository = applicationRepository;
+            _attachmentRepository = attachmentRepository;
+            _mapper = mapper;
+            //_webHostEnvironment = webHostEnvironment;
         }
 
         public IUserRepository UserRepository
@@ -41,7 +54,7 @@ namespace TaskWebApi.Repositories
             {
                 if (_userRepository == null)
                 {
-                    _userRepository = new UserRepository(_context, _optionsMonitor, _configuration, _roleManager, _userManager, _signInManager);
+                    _userRepository = new UserRepository(_context, _optionsMonitor, _configuration, _roleManager, _userManager, _signInManager, _sendMail);
                 }
                 return _userRepository;
             }
@@ -55,6 +68,30 @@ namespace TaskWebApi.Repositories
                     _refreshTokensRepository = new RefreshTokensRepository(_context);
                 }
                 return _refreshTokensRepository;
+            }
+        }
+
+        public IApplicationRepository ApplicationRepository
+        {
+            get
+            {
+                if (_applicationRepository == null)
+                {
+                    _applicationRepository = new ApplicationRepository(_context, _mapper, _attachmentRepository);
+                }
+                return _applicationRepository;
+            }
+        }
+
+        public IAttachmentRepository AttachmentRepository
+        {
+            get
+            {
+                if (_attachmentRepository == null)
+                {
+                    _attachmentRepository = new AttachmentRepository(_context, _mapper);
+                }
+                return _attachmentRepository;
             }
         }
 

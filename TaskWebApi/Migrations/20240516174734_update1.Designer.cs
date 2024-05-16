@@ -12,7 +12,7 @@ using TaskWebApi.Repositories.EF;
 namespace TaskWebApi.Migrations
 {
     [DbContext(typeof(TaskDbContext))]
-    [Migration("20240515035301_update1")]
+    [Migration("20240516174734_update1")]
     partial class update1
     {
         /// <inheritdoc />
@@ -158,13 +158,33 @@ namespace TaskWebApi.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TaskWebApi.Data.Entities.AttachmentEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("applicationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("applicationId");
+
+                    b.ToTable("Attachments");
+                });
+
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.ApplicationEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ApplicationType")
                         .HasColumnType("int");
@@ -192,10 +212,8 @@ namespace TaskWebApi.Migrations
                     b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId1")
+                    b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("reason")
@@ -204,18 +222,15 @@ namespace TaskWebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Application");
                 });
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.ClaimEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -249,14 +264,12 @@ namespace TaskWebApi.Migrations
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.UserClaimEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClaimId")
-                        .HasColumnType("int");
+                    b.Property<string>("ClaimId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -264,17 +277,15 @@ namespace TaskWebApi.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId1")
+                    b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClaimId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserClaim");
                 });
@@ -369,11 +380,8 @@ namespace TaskWebApi.Migrations
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.WageEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("DayOff")
                         .HasColumnType("int");
@@ -387,16 +395,13 @@ namespace TaskWebApi.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserEntityId")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserEntityId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Wage");
                 });
@@ -452,11 +457,24 @@ namespace TaskWebApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TaskWebApi.Data.Entities.AttachmentEntity", b =>
+                {
+                    b.HasOne("TaskWebApi.Repositories.Entities.ApplicationEntity", "Applications")
+                        .WithMany("Attachments")
+                        .HasForeignKey("applicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Applications");
+                });
+
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.ApplicationEntity", b =>
                 {
                     b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "User")
                         .WithMany("Applications")
-                        .HasForeignKey("UserId1");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -482,7 +500,9 @@ namespace TaskWebApi.Migrations
 
                     b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "User")
                         .WithMany("UserClaims")
-                        .HasForeignKey("UserId1");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Claim");
 
@@ -491,13 +511,18 @@ namespace TaskWebApi.Migrations
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.WageEntity", b =>
                 {
-                    b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "UserEntity")
+                    b.HasOne("TaskWebApi.Repositories.Entities.UserEntity", "User")
                         .WithMany("Wages")
-                        .HasForeignKey("UserEntityId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserEntity");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TaskWebApi.Repositories.Entities.ApplicationEntity", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("TaskWebApi.Repositories.Entities.ClaimEntity", b =>

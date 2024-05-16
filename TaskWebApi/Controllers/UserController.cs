@@ -36,7 +36,7 @@ namespace API.Controllers
         [HttpGet]
         //[Authorize(AuthenticationSchemes = "Bearer")]
         [Route("/api/[controller]/get-all-user")]
-        [Authorize(Roles = AppRole.Admin)]
+        //[Authorize(Roles = AppRole.Admin)]
         public async Task<ActionResult<UserEntity>> GetAllUsers()
         {
             try
@@ -106,6 +106,14 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost]
+        [Route("api/[controller]/confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string email, string otp)
+        {
+            return await _userService.ConfirmEmail(email, otp);
+        }
+
 
         [HttpPut]
         [Route("/api/[controller]/edit-user")]

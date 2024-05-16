@@ -9,13 +9,13 @@ namespace TaskWebApi.Repositories.Entities
     {
         [Key]
 
-        public int Id { get; set; }
+        public string Id { get; set; }
         public WagetType Type { get; set; }
         public double Price { get; set; }
         public int DayOff { get; set; }
         public int Total { get; set; }
         [ForeignKey(nameof(UserEntity))]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public UserEntity User { get; set; }
     }
 }

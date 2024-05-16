@@ -8,12 +8,12 @@ namespace TaskWebApi.Repositories.Entities
     public class UserClaimEntity
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
         [ForeignKey(nameof(UserEntity))]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public UserEntity User { get; set; }
         [ForeignKey(nameof(ClaimEntity))]
-        public int ClaimId { get; set; }
+        public string ClaimId { get; set; }
         public ClaimEntity Claim { get; set; }
         public string? ClaimType { get; set; }
 

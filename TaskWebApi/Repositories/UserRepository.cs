@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -26,7 +27,7 @@ namespace TaskWebApi.Repositories
         Task<UserEntity> GetByEmailAsync(string email);
 
         Task<IdentityResult> CreateAsync(RegisterModel model);
-
+        Task<IActionResult> ConfirmEmail(string email, string otp);
         Task<string> CheckLoginAsync(RequestLoginModel entity);
         Task DeleteAsync(string id);
         Task<UserEntity> UpdateAsync(UserEntity entity);
@@ -39,11 +40,12 @@ namespace TaskWebApi.Repositories
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<UserEntity> _userManager;
-
+        private readonly SendMail _sendMail;
         private readonly SignInManager<UserEntity> _signInManager;
 
 
-        public UserRepository(TaskDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager)
+
+        public UserRepository(TaskDbContext context, IOptionsMonitor<AppSetting> optionsMonitor, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager, SendMail sendMail)
         {
             _context = context;
             _appSettings = optionsMonitor.CurrentValue;
@@ -51,6 +53,7 @@ namespace TaskWebApi.Repositories
             _roleManager = roleManager;
             _userManager = userManager;
             _signInManager = signInManager;
+            _sendMail = sendMail;
         }
 
         public async Task<List<UserEntity>> GetAllAsync()
@@ -77,8 +80,13 @@ namespace TaskWebApi.Repositories
                 UserName = model.Email,
                 PhoneNumber = model.PhoneNumber,
                 Roles = model.Roles,
-                IsActive = true // Default value for IsActive
+                IsActive = false, // Default value for IsActive
+                EmailConfirmed = false
             };
+            if (model.Password != model.ConfirmPassword)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Password is false" });
+            }
 
             // Create user with UserManager
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -100,15 +108,54 @@ namespace TaskWebApi.Repositories
                 {
                     return IdentityResult.Failed(new IdentityError { Description = "Failed to add user to admin role" });
                 }
+                string otp = GenerateOtp();
+                user.VerificationToken = otp;
+                await _userManager.UpdateAsync(user);
+                _sendMail.SendEmail(user.Email, "Confirm your account", $"Your OTP code is: {otp}");
+
             }
 
             return result;
         }
 
+        private string GenerateOtp()
+        {
+            Random random = new Random();
+            int otp = random.Next(100000, 1000000);
+            return otp.ToString();
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string email, string otp)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return new NotFoundResult();
+
+            if (user.VerificationToken != otp)
+            {
+                return new BadRequestObjectResult("Invalid OTP.");
+            }
+
+            user.EmailConfirmed = true;
+            user.IsActive = true;
+            user.VerificationToken = null;
+            await _userManager.UpdateAsync(user);
+
+            return new OkObjectResult("Email confirmed successfully.");
+        }
 
         public async Task<string> CheckLoginAsync(RequestLoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return "Invalid login attempt.";
+            }
+            if (!user.IsActive || !user.EmailConfirmed)
+            {
+                return "You need to confirm your email.";
+            }
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 return string.Empty;

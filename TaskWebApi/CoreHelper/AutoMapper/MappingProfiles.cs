@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TaskWebApi.Data.Entities;
 using TaskWebApi.Model;
 using TaskWebApi.Repositories.Entities;
 
@@ -15,7 +17,11 @@ namespace TaskWebApi.CoreHelper
               .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth))
               .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
               .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles));
-
+            CreateMap<ApplicationEntity, ApplicationModel>().ReverseMap();
+            CreateMap<ApplicationEntity, ApplicationModel>();
+            CreateMap<AttachmentEntity, AttachmentModel>().ReverseMap();
+            CreateMap<AttachmentEntity, AttachmentModel>();
+            CreateMap<ActionResult<ApplicationModel>, ApplicationModel>();
 
         }
     }

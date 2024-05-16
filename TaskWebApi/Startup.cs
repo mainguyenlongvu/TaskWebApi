@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using TaskWebApi.Model;
 using Microsoft.AspNetCore.Identity;
 using TaskWebApi.Repositories.Entities;
+using TaskWebApi.CoreHelper.Helper;
 
 namespace TaskWebApi
 {
@@ -136,7 +137,13 @@ namespace TaskWebApi
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IApplicationService, ApplicationService>();
+            services.AddScoped<IApplicationRepository, ApplicationRepository>();
+            services.AddScoped<IAttachmentService, AttachmentService>();
+            services.AddScoped<IAttachmentRepository, AttachmentRepository>();
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+            services.AddScoped<SendMail>();
+
         }
     }
 }
