@@ -10,10 +10,10 @@ namespace TaskWebApi.Repositories.Entities
         [Key]
 
         public string Id { get; set; }
-        public WagetType Type { get; set; }
         public double Price { get; set; }
-        public int DayOff { get; set; }
-        public int Total { get; set; }
+        public int DayOffApproved { get; set; }
+        public int DayOffRejected { get; set; }
+        public double Total { get; set; }
         [ForeignKey(nameof(UserEntity))]
         public string UserId { get; set; }
         public UserEntity User { get; set; }

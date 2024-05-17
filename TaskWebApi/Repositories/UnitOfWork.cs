@@ -16,6 +16,7 @@ namespace TaskWebApi.Repositories
         IRefreshTokensRepository RefreshTokensRepository { get; }
         IApplicationRepository ApplicationRepository { get;  }
         IAttachmentRepository AttachmentRepository { get; }
+        IWageRepository WageRepository { get; }
         Task<int> SaveChangesAsync();
     }
 
@@ -27,6 +28,7 @@ namespace TaskWebApi.Repositories
         private IRefreshTokensRepository _refreshTokensRepository;
         private IApplicationRepository _applicationRepository;
         private IAttachmentRepository _attachmentRepository;
+        private IWageRepository _wageRepository;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         //private readonly IWebHostEnvironment _webHostEnvironment;
@@ -59,6 +61,19 @@ namespace TaskWebApi.Repositories
                 return _userRepository;
             }
         }
+
+        public IWageRepository WageRepository
+        {
+            get
+            {
+                if (_wageRepository == null)
+                {
+                    _wageRepository = new WageRepository(_context, _mapper, _userManager);
+                }
+                return _wageRepository;
+            }
+        }
+
         public IRefreshTokensRepository RefreshTokensRepository
         {
             get

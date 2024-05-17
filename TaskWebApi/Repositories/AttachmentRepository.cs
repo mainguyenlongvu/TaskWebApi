@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +17,7 @@ namespace TaskWebApi.Repositories
     public interface IAttachmentRepository
     {
         Task<List<AttachmentModel>?> AddAttachments(ICollection<IFormFile> files, string applicationId);
+        Task<List<AttachmentModel>> GetAllAttachment();
         Task<string?> DeletePhoto(string publicId);
     }
 
@@ -38,6 +41,17 @@ namespace TaskWebApi.Repositories
                 Directory.CreateDirectory(_imageContentFolder);
             }
         }
+
+        public async Task<List<AttachmentModel>> GetAllAttachment()
+        {
+            var application = await _context.Attachments
+                 .ProjectTo<AttachmentModel>(_mapper.ConfigurationProvider)
+                 .ToListAsync();
+
+            return application;
+
+        }
+
 
         public async Task<List<AttachmentModel>?> AddAttachments(ICollection<IFormFile> files, string applicationId)
         {

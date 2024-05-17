@@ -24,15 +24,11 @@ namespace TaskWebApi.Services
     }
     public class ApplicationService : IApplicationService
     {
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IAttachmentService _attachmentService;
 
-        public ApplicationService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService)
+        public ApplicationService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _mapper = mapper;
             _unitOfWork = unitOfWork;
-            _attachmentService = attachmentService;
         }
         public async Task<ApplicationModel?> ApproveApplication(string applicationId)
         {

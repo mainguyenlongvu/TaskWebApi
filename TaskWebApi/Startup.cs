@@ -27,7 +27,10 @@ namespace TaskWebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            }); ;
             services.AddEndpointsApiExplorer();
             services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
@@ -138,6 +141,8 @@ namespace TaskWebApi
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IApplicationService, ApplicationService>();
+            services.AddScoped<IWageRepository, WageRepository>();
+            services.AddScoped<IWageService, WageService>();
             services.AddScoped<IApplicationRepository, ApplicationRepository>();
             services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();

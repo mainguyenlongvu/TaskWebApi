@@ -22,6 +22,8 @@ namespace TaskWebApi.CoreHelper
             CreateMap<AttachmentEntity, AttachmentModel>().ReverseMap();
             CreateMap<AttachmentEntity, AttachmentModel>();
             CreateMap<ActionResult<ApplicationModel>, ApplicationModel>();
+            CreateMap<WageEntity, WageModel>();
+            CreateMap<WageEntity, WageModel>().ReverseMap();
 
         }
     }
